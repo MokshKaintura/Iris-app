@@ -33,3 +33,46 @@ rf_clf.fit(X_train, y_train)
 # Creating a Random Forest Classifier model.
 log_reg = LogisticRegression(n_jobs = -1)
 log_reg.fit(X_train, y_train)
+@st.cache()
+def prediction(model, sepal_length, sepal_width, petal_length, petal_width):
+  species = model.predict([[sepal_length, sepal_width, petal_length, petal_width]])
+  species = species[0]
+  if species == 0:
+    return "Iris-setosa"
+  elif species == 1:
+    return "Iris-virginica"
+  else:
+    return "Iris-versicolor"  
+    # Add title widget
+st.sidebar.title("Iris Species Prediction App")      
+
+# Add 4 sliders and store the value returned by them in 4 separate variables. 
+s_len = st.sidebar.slider("Sepal Length", float(iris_df["SepalLengthCm"].min()), float(iris_df["SepalLengthCm"].max()))
+# The 'float()' function converts the 'numpy.float' values to Python float values.
+s_wid = st.sidebar.slider("Sepal Width", float(iris_df["SepalWidthCm"].min()), float(iris_df["SepalWidthCm"].max()))
+p_len = st.sidebar.slider("Petal Length", float(iris_df["PetalLengthCm"].min()), float(iris_df["PetalLengthCm"].max()))
+p_wid = st.sidebar.slider("Petal Width", float(iris_df["PetalWidthCm"].min()), float(iris_df["PetalWidthCm"].max()))
+
+# Add a select box in the sidebar with the 'Classifier' label.
+# Also pass 3 options as a tuple ('Support Vector Machine', 'Logistic Regression', 'Random Forest Classifier').
+# Store the current value of this slider in the 'classifier' variable.
+classifier = st.sidebar.selectbox('Classifier', ('Support Vector Machine', 'Logistic Regression', 'Random Forest Classifier'))
+
+# When the 'Predict' button is clicked, check which classifier is chosen and call the 'prediction()' function.
+# Store the predicted value in the 'species_type' variable accuracy score of the model in the 'score' variable. 
+# Print the values of 'species_type' and 'score' variables using the 'st.text()' function.
+if st.sidebar.button("Predict"):
+  if classifier == 'Support Vector Machine':
+    species_type = prediction(svc_model, s_len, s_wid, p_len, p_wid)
+    score = svc_model.score(X_train, y_train)
+
+  elif classifier =='Logistic Regression':
+    species_type = prediction(log_reg, s_len, s_wid, p_len, p_wid)
+    score = log_reg.score(X_train, y_train)
+
+  else:
+    species_type = prediction(rf_clf, s_len, s_wid, p_len, p_wid)
+    score = rf_clf.score(X_train, y_train)
+  
+  st.write("Species predicted:", species_type)
+  st.write("Accuracy score of this model is:", score)
